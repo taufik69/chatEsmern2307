@@ -11,9 +11,17 @@ import {
   infoToast,
 } from "../../../Utils/Toastfy/Toast.js";
 import { Circles } from "react-loader-spinner";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+} from "firebase/auth";
+import { getDatabase, push, ref, set } from "firebase/database";
+import moment from "moment";
 const RegistrationLeft = () => {
   const auth = getAuth();
+  const db = getDatabase();
   const [Eye, setEye] = useState(false);
   const [Email, setEmail] = useState("");
   const [fullName, setfullName] = useState("");
@@ -56,20 +64,41 @@ const RegistrationLeft = () => {
         "password Missing || must be 8 character uppercase lowercase and speacila char",
       );
     } else {
-      setEmail("");
-      setfullName("");
-      setpassword("");
-      setEmailError("");
-      setpasswordError("");
-      setfullNameError("");
       setloading(true);
       createUserWithEmailAndPassword(auth, Email, password)
         .then((userinfo) => {
           SucessToast(`${fullName} Registration Sucessfully`);
-          setloading(false);
+        })
+        .then(() => {
+          updateProfile(auth.currentUser, {
+            displayName: fullName,
+          });
+        })
+        .then(() => {
+          sendEmailVerification(auth.currentUser).then(() => {
+            infoToast(`${auth.currentUser.displayName} Please Check Your Mail`);
+          });
+        })
+        .then(() => {
+          const UserRef = ref(db, "users/");
+          set(push(UserRef), {
+            userUid: auth.currentUser.uid,
+            UserEmail: auth.currentUser.email,
+            UserName: fullName,
+            createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+          });
         })
         .catch((err) => {
-          console.log(err);
+          ErrorToast(`${err.code}`, "top-right", 7000);
+        })
+        .finally(() => {
+          setEmail("");
+          setfullName("");
+          setpassword("");
+          setEmailError("");
+          setpasswordError("");
+          setfullNameError("");
+          setloading(false);
         });
     }
   };

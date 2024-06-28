@@ -43,7 +43,7 @@ const infoToast = (
   toast.info(message, {
     position: position,
     autoClose: dealy,
-    hideProgressBar: false,
+    hideProgressBar: true,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
