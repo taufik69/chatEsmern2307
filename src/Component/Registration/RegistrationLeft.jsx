@@ -19,6 +19,7 @@ import {
 } from "firebase/auth";
 import { getDatabase, push, ref, set } from "firebase/database";
 import moment from "moment";
+import { Link } from "react-router-dom";
 const RegistrationLeft = () => {
   const auth = getAuth();
   const db = getDatabase();
@@ -85,6 +86,7 @@ const RegistrationLeft = () => {
             userUid: auth.currentUser.uid,
             UserEmail: auth.currentUser.email,
             UserName: fullName,
+            UserPhotoUrl: "",
             createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
           });
         })
@@ -214,7 +216,7 @@ const RegistrationLeft = () => {
               <p className="mt-5 flex items-center justify-center text-xl font-normal text-Auth_main_color">
                 Already have an account ?
                 <span className="cursor-pointer text-[#EA6C00] hover:underline">
-                  Sign In
+                  <Link to={"/login"}> Sign In</Link>
                 </span>
               </p>
             </form>
