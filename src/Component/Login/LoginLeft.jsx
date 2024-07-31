@@ -55,7 +55,6 @@ const LoginLeft = () => {
    */
 
   const handleSignin = () => {
-    setloading(true);
     const { email, password } = loginInput;
     if (!email || !isEmailValid(email)) {
       setloginError({
@@ -70,6 +69,7 @@ const LoginLeft = () => {
           "password Missing || must be 8 character uppercase lowercase and speacila char",
       });
     } else {
+      setloading(true);
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           SucessToast(`Login Sucessfull`);

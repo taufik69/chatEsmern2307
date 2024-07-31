@@ -9,12 +9,14 @@ import {
   Route,
 } from "react-router-dom";
 import Login from "./Pages/Login/Login";
+import Home from "./Pages/Home/Home.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
       <Route path="/registration" element={<Registration />}></Route>
       <Route path="/login" element={<Login />}></Route>
+      <Route path="/" element={<Home />}></Route>
     </Route>,
   ),
 );
