@@ -4,6 +4,7 @@ export default {
   theme: {
     fontFamily: {
       custonNunito: ["Nunito", "sans-serif"],
+      poppins: ["Poppins", "sans-serif"],
     },
     extend: {
       colors: {
@@ -11,5 +12,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar")],
 };

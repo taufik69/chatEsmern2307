@@ -22,7 +22,7 @@ const HomeLeft = () => {
 
       <div>
         <ul className="flex flex-col items-center gap-y-10">
-          <li className="relative flex w-[166px] justify-center rounded-l-lg bg-white py-1 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600 cursor-pointer">
+          <li className="relative flex w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-1 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600">
             <img
               src={home}
               alt={home}

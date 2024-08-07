@@ -1,12 +1,9 @@
 import React from "react";
-import HomeLeft from "../../Component/HomeComponent/HomeLeft/HomeLeft";
-import HomeRight from "../../Component/HomeComponent/HomeRight/HomeRight";
-
+import GroupList from "../../Component/HomeComponent/HomeRightComponent/GroupList/GroupList";
 const Home = () => {
   return (
-    <div className="flex p-9">
-      <HomeLeft />
-      <HomeRight />
+    <div className="flex">
+      <GroupList />
     </div>
   );
 };
