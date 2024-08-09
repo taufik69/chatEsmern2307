@@ -17,13 +17,14 @@ const router = createBrowserRouter(
       <Route path="/registration" element={<Registration />}></Route>
       <Route path="/login" element={<Login />}></Route>
       <Route path="/" element={<RootLayout />}>
-        <Route path="/home" element={<Home />}></Route>
+        <Route index element={<Home />}></Route>
         <Route path="/chat" element={"this is Chat page"}></Route>
+
+        <Route path="/setting" element={"this is setting page"}></Route>
         <Route
-          path="notification"
+          path="/notification"
           element={"this is notification page"}
         ></Route>
-        <Route path="/setting" element={"this is setting page"}></Route>
       </Route>
     </Route>,
   ),

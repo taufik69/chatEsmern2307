@@ -5,10 +5,14 @@ import chat from "../../../assets/home/homeLeft/chat.gif";
 import gear from "../../../assets/home/homeLeft/gear.gif";
 import notification from "../../../assets/home/homeLeft/notification.gif";
 import logout from "../../../assets/home/homeLeft/logout.png";
+import { Link, useLocation } from "react-router-dom";
 import { IoCloudUploadOutline } from "react-icons/io5";
 const HomeLeft = () => {
+  const location = useLocation();
+  console.log();
+
   return (
-    <div className="flex h-[94vh] w-[184px] flex-col items-center gap-y-20 rounded-2xl bg-gradient-to-b from-sky-500 to-indigo-300">
+    <div className="flex h-[94vh] w-[218px] flex-col items-center gap-y-20 rounded-2xl bg-gradient-to-b from-sky-500 to-indigo-300">
       <div className="relative mt-6 h-28 w-28 cursor-pointer rounded-full bg-white shadow-2xl">
         <picture>
           <img
@@ -22,34 +26,51 @@ const HomeLeft = () => {
 
       <div>
         <ul className="flex flex-col items-center gap-y-10">
-          <li className="relative flex w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-1 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600">
-            <img
-              src={home}
-              alt={home}
-              className="h-full w-16 object-cover mix-blend-multiply"
-            />
+          <li
+            className={`relative flex cursor-pointer ${location.pathname === "/" && "w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-1 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600"}`}
+          >
+            <Link to={"/"}>
+              <img
+                src={home}
+                alt={home}
+                className="h-full w-14 object-cover mix-blend-multiply"
+              />
+            </Link>
           </li>
 
-          <li className="w-16 cursor-pointer">
-            <img
-              src={chat}
-              alt={home}
-              className="h-full w-full object-cover mix-blend-multiply"
-            />
+          <li
+            className={`relative flex ${location.pathname === "/chat" && "w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-3 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600"}`}
+          >
+            <Link to={"/chat"}>
+              <img
+                src={chat}
+                alt={home}
+                className="h-full w-full object-cover mix-blend-multiply"
+              />
+            </Link>
           </li>
-          <li className="w-16 cursor-pointer">
-            <img
-              src={gear}
-              alt={home}
-              className="h-full w-full object-cover mix-blend-multiply"
-            />
+          <li
+            className={`relative flex ${location.pathname === "/setting" && "w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-3 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600"}`}
+          >
+            <Link to={"/setting"}>
+              <img
+                src={gear}
+                alt={home}
+                className="h-full w-full object-cover mix-blend-multiply"
+              />
+            </Link>
           </li>
-          <li className="w-16 cursor-pointer">
-            <img
-              src={notification}
-              alt={home}
-              className="h-full w-full object-cover mix-blend-multiply"
-            />
+          <li
+            className={`relative flex ${location.pathname === "/notification" && "w-[166px] cursor-pointer justify-center rounded-l-lg bg-white py-0 after:absolute after:right-[-9px] after:top-[0px] after:h-full after:w-[16px] after:rounded-l-lg after:bg-red-600"}`}
+          >
+            <Link to="/notification">
+              {" "}
+              <img
+                src={notification}
+                alt={home}
+                className="h-full w-full object-cover mix-blend-multiply"
+              />
+            </Link>
           </li>
         </ul>
       </div>
