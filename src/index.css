@@ -45,12 +45,14 @@
 
 @layer components {
   .heading {
-    @apply font-poppins text-[18px] font-semibold text-black;
+    @apply text-wrap break-words font-poppins text-[18px] font-semibold text-black;
   }
   .subHeading {
-    @apply font-poppins text-[15px] font-normal text-[#4D4D4D] opacity-[75%];
+    @apply text-wrap break-words font-poppins text-[15px] font-normal text-[#4D4D4D] opacity-[75%];
   }
   .buttonCommon {
-    @apply font-poppins bg-gradient-to-r from-cyan-500 to-blue-500 text-xl font-semibold text-white;
+    @apply bg-gradient-to-r from-cyan-500 to-blue-500 font-poppins text-xl font-semibold text-white;
   }
+
+  
 }

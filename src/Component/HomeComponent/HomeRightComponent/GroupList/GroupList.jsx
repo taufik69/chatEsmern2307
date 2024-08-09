@@ -1,7 +1,7 @@
 import React from "react";
 import Search from "../Search/Search.jsx";
 import { FcSearch } from "react-icons/fc";
-import avatar from "../../../../assets/home/homeLeft/avatar.gif";
+import avatar from "../../../../assets/home/Homeright/purr.gif";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 const GroupList = () => {
   return (
@@ -19,7 +19,7 @@ const GroupList = () => {
           </div>
         </div>
 
-        <div className="h-[347px] w-[427px] rounded-2xl shadow-2xl">
+        <div className="h-[347px] w-[527px] rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between px-7 pt-4">
             <h1 className="font-poppins text-xl font-semibold text-black">
               GroupList
@@ -29,7 +29,7 @@ const GroupList = () => {
             </span>
           </div>
 
-          <div className="scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-gray-300 h-[88%] w-full overflow-y-scroll rounded-2xl px-3">
+          <div className="h-[88%] w-full overflow-y-scroll rounded-2xl px-3 scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-sky-400">
             {[...new Array(10)].map((_, index) => (
               <div className="mt-5 flex items-center gap-x-3">
                 <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
@@ -41,9 +41,11 @@ const GroupList = () => {
                     />
                   </picture>
                 </div>
-                <div className="ml-2 flex basis-[200px] flex-col items-start justify-center">
+                <div className="ml-2 flex basis-[65%] flex-col items-start justify-center">
                   <h1 className="heading">Friends Reunion</h1>
-                  <p className="subHeading">Hi Guys, Wassup!</p>
+                  <p className="subHeading">
+                    Hi Guys, Wassup Lorem ipsum dolor
+                  </p>
                 </div>
 
                 <button className="buttonCommon ml-4 rounded-lg px-2 py-2">
