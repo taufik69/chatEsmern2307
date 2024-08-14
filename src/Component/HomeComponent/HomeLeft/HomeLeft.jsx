@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import avatar from "../../../assets/home/homeLeft/avatar.gif";
 import home from "../../../assets/home/homeLeft/home.gif";
 import chat from "../../../assets/home/homeLeft/chat.gif";
@@ -7,23 +7,68 @@ import notification from "../../../assets/home/homeLeft/notification.gif";
 import logout from "../../../assets/home/homeLeft/logout.png";
 import { Link, useLocation } from "react-router-dom";
 import { IoCloudUploadOutline } from "react-icons/io5";
+import { getAuth } from "firebase/auth";
+import { Uploader } from "uploader"; // Installed by "react-uploader".
+import { UploadButton } from "react-uploader";
+import { getDatabase, ref, onValue, update } from "firebase/database";
 const HomeLeft = () => {
   const location = useLocation();
-  console.log();
+  const db = getDatabase();
+  const auth = getAuth();
+  const [user, setuser] = useState({});
+  const uploader = Uploader({
+    apiKey: "free", // Get production API keys from Bytescale
+  });
+  const options = { multi: false, mime: "image/jpeg" };
+
+  /**
+   * todo : fetch data from user db
+   */
+  useEffect(() => {
+    const getUserData = () => {
+      const starCountRef = ref(db, "users/");
+      onValue(starCountRef, (snapshot) => {
+        snapshot.forEach((item) => {
+          if (auth.currentUser.uid === item.val().userUid) {
+            setuser({ ...item.val(), userKey: item.key });
+          }
+        });
+      });
+    };
+    getUserData();
+  }, []);
+
+  console.log(user);
 
   return (
-    <div className="flex h-[94vh] w-[218px] flex-col items-center gap-y-20 rounded-2xl bg-gradient-to-b from-sky-500 to-indigo-300">
+    <div className="flex h-[94vh] w-[218px] flex-col items-center gap-y-8 rounded-2xl bg-gradient-to-b from-sky-500 to-indigo-300">
       <div className="relative mt-6 h-28 w-28 cursor-pointer rounded-full bg-white shadow-2xl">
         <picture>
           <img
-            src={avatar}
+            src={user ? user.UserPhotoUrl : avatar}
             alt={avatar}
-            className="h-full w-full object-cover p-3"
+            className="h-full w-full rounded-full object-cover p-3"
           />
         </picture>
-        <IoCloudUploadOutline className="absolute left-[39%] top-[42%] text-2xl text-black" />
+        <UploadButton
+          uploader={uploader}
+          options={options}
+          onComplete={(files) =>
+            update(ref(db, `users/${user.userKey}`), {
+              UserPhotoUrl: files[0].fileUrl,
+            })
+          }
+        >
+          {({ onClick }) => (
+            <button onClick={onClick}>
+              <IoCloudUploadOutline className="absolute left-[39%] top-[42%] text-2xl text-black" />
+            </button>
+          )}
+        </UploadButton>
       </div>
-
+      <h1 className="font-custonNunito text-2xl font-bold capitalize text-white">
+        {user ? user.UserName : "Name Missing"}
+      </h1>
       <div>
         <ul className="flex flex-col items-center gap-y-10">
           <li

@@ -6,7 +6,7 @@ import {
 } from "../../../Utils/Validation/validation";
 import { ColorRing } from "react-loader-spinner";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -19,6 +19,7 @@ import { getDatabase, push, ref, set } from "firebase/database";
 const LoginLeft = () => {
   const auth = getAuth();
   const db = getDatabase();
+  const navigate = useNavigate();
   const [loading, setloading] = useState(false);
   const [Eye, setEye] = useState(false);
   const [loginInput, setloginInput] = useState({
@@ -73,6 +74,7 @@ const LoginLeft = () => {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           SucessToast(`Login Sucessfull`);
+          navigate("/");
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -112,6 +114,8 @@ const LoginLeft = () => {
           UserName: displayName,
           UserPhotoUrl: photoUrl ? photoUrl : "",
           createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+        }).then(() => {
+          navigate("/");
         });
       })
 
