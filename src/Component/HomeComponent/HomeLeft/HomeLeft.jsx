@@ -38,8 +38,6 @@ const HomeLeft = () => {
     getUserData();
   }, []);
 
-  console.log(user);
-
   return (
     <div className="flex h-[94vh] w-[218px] flex-col items-center gap-y-8 rounded-2xl bg-gradient-to-b from-sky-500 to-indigo-300">
       <div className="relative mt-6 h-28 w-28 cursor-pointer rounded-full bg-white shadow-2xl">
