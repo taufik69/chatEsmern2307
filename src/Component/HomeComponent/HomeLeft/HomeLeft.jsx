@@ -7,9 +7,9 @@ import notification from "../../../assets/home/homeLeft/notification.gif";
 import logout from "../../../assets/home/homeLeft/logout.png";
 import { Link, useLocation } from "react-router-dom";
 import { IoCloudUploadOutline } from "react-icons/io5";
-import { getAuth } from "firebase/auth";
 import { Uploader } from "uploader"; // Installed by "react-uploader".
 import { UploadButton } from "react-uploader";
+import { getAuth, updateProfile } from "firebase/auth";
 import { getDatabase, ref, onValue, update } from "firebase/database";
 const HomeLeft = () => {
   const location = useLocation();
@@ -54,6 +54,10 @@ const HomeLeft = () => {
           onComplete={(files) =>
             update(ref(db, `users/${user.userKey}`), {
               UserPhotoUrl: files[0].fileUrl,
+            }).then(() => {
+              updateProfile(auth.currentUser, {
+                photoURL: files[0].fileUrl,
+              });
             })
           }
         >

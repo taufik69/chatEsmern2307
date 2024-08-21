@@ -1,8 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FcSearch } from "react-icons/fc";
 import avatar from "../../../../assets/home/Homeright/girls.gif";
 import { HiOutlineDotsVertical } from "react-icons/hi";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  set,
+  push,
+  remove,
+} from "firebase/database";
+import { getAuth } from "firebase/auth";
+import moment from "moment";
 const Friends = () => {
+  const db = getDatabase();
+  const auth = getAuth();
+  const [FriendList, setFriendList] = useState([]);
+
+  useEffect(() => {
+    const FriendRef = ref(db, "Friends/");
+    onValue(FriendRef, (snapshot) => {
+      const FriendArr = [];
+      snapshot.forEach((item) => {
+        FriendArr.push({ ...item.val() });
+      });
+      setFriendList(FriendArr);
+    });
+  }, []);
+  console.log(FriendList);
+
   return (
     <div className="mb-7 self-end">
       <div className="flex flex-col justify-end gap-y-6">

@@ -8,6 +8,7 @@ const UserList = () => {
   const db = getDatabase();
   const auth = getAuth();
   const [userList, setuserList] = useState([]);
+  const [FriendRequestList, setFriendRequestList] = useState([]);
 
   useEffect(() => {
     const UserRef = ref(db, "users/");
@@ -25,6 +26,24 @@ const UserList = () => {
   }, []);
 
   /**
+   * todo : fetch data from friendRequest db
+   */
+  useEffect(() => {
+    const FriendRequestRef = ref(db, "FriendRequest/");
+    onValue(FriendRequestRef, (snapshot) => {
+      const FriendRequestArr = [];
+      snapshot.forEach((item) => {
+        if (true)
+          FriendRequestArr.push(
+            item.val().whoSendFriendRequestUid +
+              item.val().whoRecivedFriendRequestUid,
+          );
+      });
+      setFriendRequestList(FriendRequestArr);
+    });
+  }, []);
+
+  /**
    * todo : handleFriendRequest fution implement
    */
   const handleFriendRequest = (item) => {
@@ -32,8 +51,8 @@ const UserList = () => {
       whoSendFriendRequestName: auth.currentUser.displayName,
       whoSendFriendRequestUid: auth.currentUser.uid,
       whoSendFriendRequestEmail: auth.currentUser.email,
-      whoSendFriendRequestProfile_picture: auth.currentUser.phoneNumber
-        ? auth.currentUser.phoneNumber
+      whoSendFriendRequestProfile_picture: auth.currentUser.photoURL
+        ? auth.currentUser.photoURL
         : null,
       whoRecivedFriendRequestUid: item.userUid,
       whoRecivedFriendRequestUserName: item.UserName,
@@ -74,7 +93,7 @@ const UserList = () => {
                 <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
                   <picture>
                     <img
-                      src={item.UserPhotoUrl || avatar}
+                      src={item.UserPhotoUrl}
                       alt={item.UserPhotoUrl}
                       className="h-full w-full rounded-full object-cover"
                     />
@@ -85,12 +104,21 @@ const UserList = () => {
                   <p className="subHeading">{item.UserEmail}</p>
                 </div>
 
-                <button
-                  className="buttonCommon ml-4 rounded-lg px-7 py-2"
-                  onClick={() => handleFriendRequest(item)}
-                >
-                  +
-                </button>
+                {FriendRequestList.includes(
+                  auth.currentUser.uid + item.userUid ||
+                    item.userUid + auth.currentUser.uid,
+                ) ? (
+                  <button className="buttonCommon ml-4 rounded-lg px-7 py-2">
+                    -
+                  </button>
+                ) : (
+                  <button
+                    className="buttonCommon ml-4 rounded-lg px-7 py-2"
+                    onClick={() => handleFriendRequest(item)}
+                  >
+                    +
+                  </button>
+                )}
               </div>
             ))}
           </div>
