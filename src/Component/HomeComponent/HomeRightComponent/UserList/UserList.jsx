@@ -93,8 +93,8 @@ const UserList = () => {
                 <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
                   <picture>
                     <img
-                      src={item.UserPhotoUrl}
-                      alt={item.UserPhotoUrl}
+                      src={item.UserPhotoUrl ? item.UserPhotoUrl : avatar}
+                      alt={item.UserPhotoUrl ? item.UserPhotoUrl : avatar}
                       className="h-full w-full rounded-full object-cover"
                     />
                   </picture>

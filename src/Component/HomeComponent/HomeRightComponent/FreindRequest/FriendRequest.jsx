@@ -47,7 +47,7 @@ const FriendRequest = () => {
    */
 
   const handleAcceptFR = (item) => {
-    set(ref(db, "Friends/"), {
+    set(push(ref(db, "Friends/")), {
       ...item,
       FriendRequestKey: null,
       createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),

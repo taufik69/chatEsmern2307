@@ -18,24 +18,42 @@ const Friends = () => {
   const [FriendList, setFriendList] = useState([]);
 
   useEffect(() => {
-    const FriendRef = ref(db, "Friends/");
-    onValue(FriendRef, (snapshot) => {
-      const FriendArr = [];
+    const starCountRef = ref(db, "Friends/");
+    onValue(starCountRef, (snapshot) => {
+      let frdarr = [];
       snapshot.forEach((item) => {
-        FriendArr.push({ ...item.val() });
+        if (auth.currentUser.uid === item.val().whoRecivedFriendRequestUid)
+          frdarr.push({ ...item.val(), friendKey: item.key });
       });
-      setFriendList(FriendArr);
+      setFriendList(frdarr);
     });
   }, []);
-  console.log(FriendList);
+
+  /**
+   * todo  : handleBlcok function implelmemt
+   **/
+
+  const handleBlcok = (item = {}) => {
+    const blockUserRef = ref(db, "blockedUser/");
+    set(push(blockUserRef), item).then(() => {
+      const removeFriends = ref(db, "Friends/" + item.friendKey);
+      remove(removeFriends);
+    });
+  };
 
   return (
     <div className="mb-7 self-end">
       <div className="flex flex-col justify-end gap-y-6">
         <div className="h-[347px] w-[527px] rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between px-7 pt-4">
-            <h1 className="font-poppins text-xl font-semibold text-black">
-              Friends
+            <h1 className="relative font-poppins text-xl font-semibold text-black">
+              Freiend
+              <span class="absolute -right-10 -top-3 flex h-10 w-10">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative flex h-10 w-10 items-center justify-center rounded-full bg-purple-200">
+                  {FriendList?.length}
+                </span>
+              </span>
             </h1>
             <span className="text-2xl text-Auth_main_color">
               <HiOutlineDotsVertical />
@@ -43,23 +61,33 @@ const Friends = () => {
           </div>
 
           <div className="h-[88%] w-full overflow-y-scroll rounded-2xl px-3 scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-sky-400">
-            {[...new Array(10)].map((_, index) => (
+            {FriendList?.map((user, index) => (
               <div className="mt-5 flex items-center gap-x-3">
                 <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
                   <picture>
                     <img
-                      src={avatar}
+                      src={
+                        user.whoSendFriendRequestProfile_picture
+                          ? user.whoSendFriendRequestProfile_picture
+                          : avatar
+                      }
                       alt={avatar}
                       className="h-full w-full rounded-full object-cover"
                     />
                   </picture>
                 </div>
                 <div className="ml-2 flex basis-[65%] flex-col items-start justify-center">
-                  <h1 className="heading">Friends Reunion</h1>
-                  <p className="subHeading">Hi Guys, Wassup!</p>
+                  <h1 className="heading capitalize">
+                    {user.whoSendFriendRequestName}
+                  </h1>
+                  <p className="subHeading">{moment(user.createdAt).toNow()}</p>
                 </div>
-
-                <span className="subHeading">Today, 8:56pm</span>
+                <button
+                  className="buttonCommon ml-4 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2"
+                  onClick={() => handleBlcok(user)}
+                >
+                  Block
+                </button>
               </div>
             ))}
           </div>
