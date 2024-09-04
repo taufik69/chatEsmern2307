@@ -53,6 +53,12 @@
   .buttonCommon {
     @apply bg-gradient-to-r from-cyan-500 to-blue-500 font-poppins text-xl font-semibold text-white;
   }
+  .preview_box {
+    width: 350px !important;
+  }
 
-  
+  .cropImage {
+    width: 350px !important;
+    height: 250px !important;
+  }
 }
