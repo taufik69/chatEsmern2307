@@ -6,6 +6,14 @@ import { HiOutlineDotsVertical } from "react-icons/hi";
 import Modal from "react-modal";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { ErrorToast, SucessToast } from "../../../../../Utils/Toastfy/Toast.js";
+import {
+  getStorage,
+  ref,
+  uploadString,
+  getDownloadURL,
+} from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 const defaultSrc =
   "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
 const customStyles = {
@@ -20,7 +28,13 @@ const customStyles = {
 };
 
 const GroupList = () => {
+  const storage = getStorage();
+
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [groupInputValue, setgroupInputValue] = useState({
+    groupName: "",
+    grouptagName: "",
+  });
   function openModal() {
     setIsOpen(true);
   }
@@ -52,10 +66,36 @@ const GroupList = () => {
   const getCropData = () => {
     if (typeof cropperRef.current?.cropper !== "undefined") {
       setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
+      SucessToast("Crop Done", "top-center");
     }
   };
 
-  console.log(cropData);
+  // onGroupchangehandaler function implement
+  const onGroupchangehandaler = (event) => {
+    const { id, value } = event.target;
+    setgroupInputValue({
+      ...groupInputValue,
+      [id]: value,
+    });
+  };
+
+  /**
+   * todo handleGreoup function implement
+   */
+
+  const handleGreoup = () => {
+    const storageRef = ref(storage, `GroupImage/image${uuidv4()}`);
+    uploadString(storageRef, cropData, "data_url")
+      .then((snapshot) => {
+        setCropData("");
+      })
+      .then(() => {
+        return getDownloadURL(storageRef);
+      })
+      .then((data) => {
+        console.log(data);
+      });
+  };
 
   return (
     <>
@@ -136,7 +176,8 @@ const GroupList = () => {
                 type="text"
                 id="groupName"
                 name="groupName"
-                value={""}
+                value={groupInputValue.groupName}
+                onChange={onGroupchangehandaler}
               />
 
               <label htmlFor="grouptagName">
@@ -147,14 +188,14 @@ const GroupList = () => {
                 type="text"
                 id="grouptagName"
                 name="grouptagName"
-                value={""}
+                value={groupInputValue.grouptagName}
+                onChange={onGroupchangehandaler}
               />
 
               {/* CROPPER BODY */}
               <div>
-                <div style={{ width: "100%" }}>
+                <div className="my-10">
                   <input type="file" onChange={onChange} />
-                  <button>Use default img</button>
                 </div>
                 <div className="flex w-[1200px] justify-between">
                   <div className="h-[250px] w-[400px]">
@@ -178,14 +219,19 @@ const GroupList = () => {
                   {/* preview */}
 
                   <div className="relative h-[250px] w-[350px] bg-red-700">
-                    <h1 className="absolute -top-7">Preview</h1>
+                    <h1 className="absolute -top-[63px] rounded-xl bg-red-500 px-5 py-3 text-white">
+                      Preview
+                    </h1>
                     <div className="img-preview preview_box z-10 h-[250px] overflow-hidden" />
                   </div>
                   {/* preview */}
                   {/* crop div */}
                   <div className="relative h-[250px] w-[350px] bg-blue-400">
                     <h1 className="absolute -top-7">
-                      <button onClick={getCropData} className="bg-red-500">
+                      <button
+                        onClick={getCropData}
+                        className="absolute -top-[30px] text-nowrap rounded-xl bg-blue-400 px-20 py-3 text-white"
+                      >
                         Crop Image
                       </button>
                     </h1>
@@ -196,7 +242,12 @@ const GroupList = () => {
               </div>
               {/* CROPPER BODY */}
 
-              <button>Create Group</button>
+              <button
+                className="mt-10 w-full bg-blue-500 py-3 text-base text-white"
+                onClick={handleGreoup}
+              >
+                Create Group
+              </button>
             </form>
           </Modal>
         </div>

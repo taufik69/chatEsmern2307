@@ -20,7 +20,8 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.24.1",
     "react-toastify": "^10.0.5",
-    "react-uploader": "^3.43.0"
+    "react-uploader": "^3.43.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
