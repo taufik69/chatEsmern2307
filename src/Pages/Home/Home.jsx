@@ -3,7 +3,7 @@ import GroupList from "../../Component/HomeComponent/HomeRightComponent/GroupLis
 import Friends from "../../Component/HomeComponent/HomeRightComponent/Friends/Friends";
 import UserList from "../../Component/HomeComponent/HomeRightComponent/UserList/UserList";
 import FriendRequest from "../../Component/HomeComponent/HomeRightComponent/FreindRequest/FriendRequest.jsx";
-import Group from "../../Component/HomeComponent/HomeRightComponent/Group/Group.jsx";
+import Group from "../../Component/HomeComponent/HomeRightComponent/MyGroup/Group.jsx";
 import BlockedUser from "../../Component/HomeComponent/HomeRightComponent/BlockedUser/BlockedUser.jsx";
 const Home = () => {
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Search from "../Search/Search.jsx";
 import { FcSearch } from "react-icons/fc";
 import avatar from "../../../../assets/home/Homeright/purr.gif";
@@ -13,6 +13,15 @@ import {
   uploadString,
   getDownloadURL,
 } from "firebase/storage";
+import {
+  getDatabase,
+  ref as dbref,
+  set,
+  push,
+  onValue,
+} from "firebase/database";
+import { getAuth } from "firebase/auth";
+import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 const defaultSrc =
   "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
@@ -29,12 +38,44 @@ const customStyles = {
 
 const GroupList = () => {
   const storage = getStorage();
-
+  const db = getDatabase();
+  const auth = getAuth();
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [loading, setloading] = useState(false);
+  const [allgroupList, setallgroupList] = useState([]);
+  const [allgroupRequestList, setallgroupRequestList] = useState([]);
   const [groupInputValue, setgroupInputValue] = useState({
     groupName: "",
     grouptagName: "",
   });
+
+  // fetch group information
+  useEffect(() => {
+    const starCountRef = dbref(db, "groups/");
+    onValue(starCountRef, (snapshot) => {
+      const groupblankarr = [];
+      snapshot.forEach((item) => {
+        if (item.val().whoCreateGroupuid !== auth.currentUser.uid) {
+          groupblankarr.push({ ...item.val(), groupKey: item.key });
+        }
+      });
+      setallgroupList(groupblankarr);
+    });
+  }, []);
+  // fetch groupRequest data
+  useEffect(() => {
+    const starCountRef = dbref(db, "groupRequest/");
+    onValue(starCountRef, (snapshot) => {
+      const groupRequestblankarr = [];
+      snapshot.forEach((item) => {
+        groupRequestblankarr.push(
+          item.val().groupKey + item.val().whoJoinGroupUid,
+        );
+      });
+      setallgroupRequestList(groupRequestblankarr);
+    });
+  }, []);
+
   function openModal() {
     setIsOpen(true);
   }
@@ -84,6 +125,15 @@ const GroupList = () => {
    */
 
   const handleGreoup = () => {
+    const { grouptagName, groupName } = groupInputValue;
+    if (!cropData || !grouptagName || !groupName) {
+      return ErrorToast(
+        `Must fillup the GroupTagName or GroupName  or Croppgin image`,
+        "top-center",
+        7000,
+      );
+    }
+    setloading(true);
     const storageRef = ref(storage, `GroupImage/image${uuidv4()}`);
     uploadString(storageRef, cropData, "data_url")
       .then((snapshot) => {
@@ -92,9 +142,48 @@ const GroupList = () => {
       .then(() => {
         return getDownloadURL(storageRef);
       })
-      .then((data) => {
-        console.log(data);
+      .then((groupDownloadImageUrl) => {
+        set(push(dbref(db, "groups/")), {
+          whoCreateGroupuid: auth.currentUser.uid,
+          whoCreateGroupName: auth.currentUser.displayName,
+          whocreateGroupProfile_picture: auth.currentUser.photoURL,
+          whoCreateGroupEmail: auth.currentUser.email,
+          groupName: groupInputValue.groupName,
+          groupTagName: groupInputValue.grouptagName,
+          groupPhoto: groupDownloadImageUrl,
+          createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+        });
+      })
+      .catch((err) => {
+        setloading(false);
+        ErrorToast(`Error from Create Group ${err} `, "top-center");
+      })
+      .finally(() => {
+        setgroupInputValue({
+          groupName: "",
+          grouptagName: "",
+        });
+        setCropData("");
+        setImage("");
+        setloading(false);
+        closeModal();
       });
+  };
+
+  /**
+   * todo handlejoinGroup funciton implement
+   * @param ({item})
+   */
+
+  const handlejoinGroup = (item = {}) => {
+    set(push(dbref(db, "groupRequest/")), {
+      ...item,
+      whoJoinGroupUid: auth.currentUser.uid,
+      whoJoinGroupName: auth.currentUser.displayName,
+      whoJoinGroupEmail: auth.currentUser.email,
+      whoJoinGroupProfile_picture: auth.currentUser.photoURL,
+      createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+    });
   };
 
   return (
@@ -115,7 +204,7 @@ const GroupList = () => {
         <div className="h-[347px] w-[527px] rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between px-7 pt-4">
             <h1 className="font-poppins text-xl font-semibold text-black">
-              GroupList
+              GroupList {allgroupList?.length}
             </h1>
             <span className="text-2xl text-Auth_main_color">
               <button
@@ -126,30 +215,65 @@ const GroupList = () => {
               </button>
             </span>
           </div>
-          <div className="h-[88%] w-full overflow-y-scroll rounded-2xl px-3 scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-sky-400">
-            {[...new Array(10)].map((_, index) => (
-              <div className="mt-5 flex items-center gap-x-3">
-                <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
-                  <picture>
-                    <img
-                      src={avatar}
-                      alt={avatar}
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  </picture>
+          <div
+            className={
+              allgroupList?.length > 0
+                ? "h-[83%] w-full overflow-y-scroll rounded-2xl px-3 scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-sky-400"
+                : "flex h-full items-center justify-center"
+            }
+          >
+            {allgroupList?.length > 0 ? (
+              allgroupList?.map((item) => (
+                <div
+                  className="mt-5 flex items-center gap-x-3"
+                  key={item.groupKey}
+                >
+                  <div className="h-[88px] w-[80px] rounded-full shadow-2xl">
+                    <picture>
+                      <img
+                        src={item ? item.groupPhoto : avatar}
+                        alt={item ? item.groupPhoto : avatar}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    </picture>
+                  </div>
+                  <div className="ml-2 flex basis-[40%] flex-col items-start justify-center">
+                    <h1 className="heading">
+                      {item ? item.groupName : "Friends Reunion"}
+                    </h1>
+                    <p className="subHeading">
+                      {item ? item.groupTagName : "Hi Guys, Wassup!"}
+                    </p>
+                  </div>
+                  {allgroupRequestList?.includes(
+                    item.groupKey + auth.currentUser.uid,
+                  ) ? (
+                    <span className="text-2xl text-Auth_main_color">
+                      <button className="buttonCommon ml-4 rounded-lg px-2 py-2">
+                        Request Pending
+                      </button>
+                    </span>
+                  ) : (
+                    <span className="text-2xl text-Auth_main_color">
+                      <button
+                        className="buttonCommon ml-4 rounded-lg px-2 py-2"
+                        onClick={() => handlejoinGroup(item)}
+                      >
+                        Join
+                      </button>
+                    </span>
+                  )}
                 </div>
-                <div className="ml-2 flex basis-[65%] flex-col items-start justify-center">
-                  <h1 className="heading">Friends Reunion</h1>
-                  <p className="subHeading">
-                    Hi Guys, Wassup Lorem ipsum dolor
-                  </p>
-                </div>
-
-                <button className="buttonCommon ml-4 rounded-lg px-2 py-2">
-                  Join
-                </button>
+              ))
+            ) : (
+              <div
+                class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-gray-800 dark:text-red-400"
+                role="alert"
+              >
+                <span class="font-medium">Danger alert!</span> Change a few No
+                Group Create a New Group
               </div>
-            ))}
+            )}
           </div>
         </div>
         <div>
@@ -241,13 +365,18 @@ const GroupList = () => {
                 </div>
               </div>
               {/* CROPPER BODY */}
-
-              <button
-                className="mt-10 w-full bg-blue-500 py-3 text-base text-white"
-                onClick={handleGreoup}
-              >
-                Create Group
-              </button>
+              {loading ? (
+                <button className="buttonCommon ml-4 mt-4 w-full rounded-lg px-2 py-2">
+                  loading......
+                </button>
+              ) : (
+                <button
+                  className="mt-10 w-full bg-blue-500 py-3 text-base text-white"
+                  onClick={handleGreoup}
+                >
+                  Create Group
+                </button>
+              )}
             </form>
           </Modal>
         </div>
