@@ -9,19 +9,39 @@ const MyGroup = () => {
   const db = getDatabase();
   const auth = getAuth();
   const [allgroupList, setallgroupList] = useState([]);
+  const [allgroupRequestList, setallgroupRequestList] = useState([]);
+
   useEffect(() => {
-    const starCountRef = ref(db, "groups/");
-    onValue(starCountRef, (snapshot) => {
-      const groupblankarr = [];
-      snapshot.forEach((item) => {
-        if (item.val().whoCreateGroupuid === auth.currentUser.uid) {
-          groupblankarr.push({ ...item.val(), groupKey: item.key });
-        }
+    const FetchGroups = () => {
+      const starCountRef = ref(db, "groups/");
+      onValue(starCountRef, (snapshot) => {
+        const groupblankarr = [];
+        snapshot.forEach((item) => {
+          if (item.val().whoCreateGroupuid === auth.currentUser.uid) {
+            groupblankarr.push({ ...item.val(), groupKey: item.key });
+          }
+        });
+        setallgroupList(groupblankarr);
       });
-      setallgroupList(groupblankarr);
-    });
+    };
+    const FetchGroupRequest = () => {
+      const starCountRef = ref(db, "groupRequest/");
+      onValue(starCountRef, (snapshot) => {
+        const groupblankarr = [];
+        snapshot.forEach((item) => {
+          groupblankarr.push({ ...item.val(), groupRequestKey: item.key });
+        });
+        setallgroupRequestList(groupblankarr);
+      });
+    };
+    FetchGroups();
+    FetchGroupRequest();
   }, []);
 
+  //handleAceptRequest function
+  const handleAceptRequest = (group) => {
+    console.log(group);
+  };
   return (
     <div className="mb-7 self-end">
       <div className="flex flex-col justify-end gap-y-6">
@@ -65,10 +85,22 @@ const MyGroup = () => {
                       {item ? item.groupTagName : "Hi Guys, Wassup!"}
                     </p>
                   </div>
-
-                  <span className="subHeading">
-                    {moment(item.createdAt).toNow()}
-                  </span>
+                  {allgroupRequestList?.map(
+                    (group) =>
+                      group.groupKey == item.groupKey && (
+                        <div className="flex gap-x-2">
+                          <button
+                            className="rounded-xl bg-blue-500 px-6 py-2 text-white"
+                            onClick={() => handleAceptRequest(group)}
+                          >
+                            Accept
+                          </button>
+                          <button className="rounded-xl bg-red-500 px-6 py-2 text-white">
+                            Reject
+                          </button>
+                        </div>
+                      ),
+                  )}
                 </div>
               ))
             ) : (
