@@ -11,6 +11,7 @@ import {
 import Login from "./Pages/Login/Login";
 import Home from "./Pages/Home/Home.jsx";
 import RootLayout from "./Component/RootLayout/RootLayout.jsx";
+import Chat from "./Pages/Chat/Chat.jsx";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
@@ -18,7 +19,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />}></Route>
       <Route path="/" element={<RootLayout />}>
         <Route index element={<Home />}></Route>
-        <Route path="/chat" element={"this is Chat page"}></Route>
+        <Route path="/chat" element={<Chat />}></Route>
 
         <Route path="/setting" element={"this is setting page"}></Route>
         <Route

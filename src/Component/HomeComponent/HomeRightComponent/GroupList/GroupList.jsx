@@ -36,7 +36,7 @@ const customStyles = {
   },
 };
 
-const GroupList = () => {
+const GroupList = ({ isChat = false }) => {
   const storage = getStorage();
   const db = getDatabase();
   const auth = getAuth();
@@ -201,7 +201,13 @@ const GroupList = () => {
           </div>
         </div>
 
-        <div className="h-[347px] w-[527px] rounded-2xl shadow-2xl">
+        <div
+          className={
+            isChat
+              ? "h-[347px] w-full rounded-2xl shadow-2xl"
+              : "h-[347px] w-[527px] rounded-2xl shadow-2xl"
+          }
+        >
           <div className="flex items-center justify-between px-7 pt-4">
             <h1 className="font-poppins text-xl font-semibold text-black">
               GroupList {allgroupList?.length}

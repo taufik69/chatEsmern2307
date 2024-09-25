@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import avatar from "../../../../assets/home/Homeright/puzzle.gif";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, set, remove } from "firebase/database";
 import { useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import moment from "moment/moment";
@@ -40,8 +40,19 @@ const MyGroup = () => {
 
   //handleAceptRequest function
   const handleAceptRequest = (group) => {
-    console.log(group);
+    set(ref(db, "groupMember/"), {
+      ...group,
+      createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+    }).then(() => {
+      remove(ref(db, `groupRequest/${group.groupRequestKey}`));
+    });
   };
+
+  // handleRejectGroupRequest funciton implement
+  const handleRejectGroupRequest = (group = {}) => {
+    remove(ref(db, `groupRequest/${group.groupRequestKey}`));
+  };
+
   return (
     <div className="mb-7 self-end">
       <div className="flex flex-col justify-end gap-y-6">
@@ -95,7 +106,10 @@ const MyGroup = () => {
                           >
                             Accept
                           </button>
-                          <button className="rounded-xl bg-red-500 px-6 py-2 text-white">
+                          <button
+                            className="rounded-xl bg-red-500 px-6 py-2 text-white"
+                            onClick={() => handleRejectGroupRequest(group)}
+                          >
                             Reject
                           </button>
                         </div>

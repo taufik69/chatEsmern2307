@@ -12,7 +12,7 @@ import {
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import moment from "moment";
-const Friends = () => {
+const Friends = ({ isChat = false }) => {
   const db = getDatabase();
   const auth = getAuth();
   const [FriendList, setFriendList] = useState([]);
@@ -44,7 +44,13 @@ const Friends = () => {
   return (
     <div className="mb-7 self-end">
       <div className="flex flex-col justify-end gap-y-6">
-        <div className="h-[347px] w-[527px] rounded-2xl shadow-2xl">
+        <div
+          className={
+            isChat
+              ? "h-[410px] w-full rounded-2xl shadow-2xl"
+              : "h-[347px] w-[527px] rounded-2xl shadow-2xl"
+          }
+        >
           <div className="flex items-center justify-between px-7 pt-4">
             <h1 className="relative font-poppins text-xl font-semibold text-black">
               Freiend
