@@ -1,8 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import profile from "../../assets/home/Homeright/purr.gif";
 import { IoPaperPlane } from "react-icons/io5";
 import { FaCameraRetro, FaSmile } from "react-icons/fa";
+import EmojiPicker from "emoji-picker-react";
 const ChatRight = () => {
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [message, setmessage] = useState("");
+  // handleEmoji function implement
+  const handleEmoji = () => {
+    setShowEmoji(!showEmoji);
+  };
+
+  // handleInputfuntin
+  const handleInput = (event) => {
+    const { value } = event.target;
+    setmessage(value);
+  };
+
+  // onEmojiClick functjion implement
+  const handlemojipicker = (event) => {
+    // console.log();
+    setmessage((prev) => {
+      return `${prev}${event?.emoji}`;
+    });
+  };
   return (
     <>
       <div className="flex items-center gap-x-5 border-b-2 border-b-gray-200 p-6">
@@ -64,15 +85,24 @@ const ChatRight = () => {
       </div>
 
       {/* chat body end */}
-      <div className="mx-4 my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow-md">
+      <div className="relative mx-4 my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow-md">
         <input
           type="text"
           placeholder="Type a message..."
+          onChange={handleInput}
           className="flex-grow bg-transparent p-2 text-sm outline-none"
+          value={message}
         />
         <div className="flex items-center gap-x-5">
           <button className="text-gray-500 hover:text-gray-700">
-            <FaSmile className="text-xl text-yellow-600" />
+            <span onClick={handleEmoji}>
+              <FaSmile className="text-xl text-yellow-600" />
+            </span>
+            {showEmoji && (
+              <span className="absolute bottom-[105%] left-[60%]">
+                <EmojiPicker onEmojiClick={handlemojipicker} />
+              </span>
+            )}
           </button>
           <button className="text-gray-500 hover:text-gray-700">
             <FaCameraRetro className="text-xl" />
