@@ -3,7 +3,12 @@ import profile from "../../assets/home/Homeright/purr.gif";
 import { IoPaperPlane } from "react-icons/io5";
 import { FaCameraRetro, FaSmile } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
+import { useSelector } from "react-redux";
+import { set, getDatabase, push, ref } from "firebase/database";
+import moment from "moment/moment";
+import { retry } from "@reduxjs/toolkit/query";
 const ChatRight = () => {
+  const db = getDatabase();
   const [showEmoji, setShowEmoji] = useState(false);
   const [message, setmessage] = useState("");
   // handleEmoji function implement
@@ -24,21 +29,42 @@ const ChatRight = () => {
       return `${prev}${event?.emoji}`;
     });
   };
+  const { friendInfo } = useSelector((state) => state.friend);
+
+  const handlemessageSEnt = () => {
+    if (friendInfo) {
+      set(push(ref(db, "singleMsg/")), {
+        ...friendInfo,
+        msg: message,
+        createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
+      })
+        .then(() => {
+          console.log("done");
+        })
+        .catch((err) => {
+          console.error("message", err);
+        })
+        .finally(() => {
+          setmessage("");
+        });
+    }
+  };
+
   return (
     <>
       <div className="flex items-center gap-x-5 border-b-2 border-b-gray-200 p-6">
         <div className="h-[75px] w-[75px] rounded-full shadow-gray-100">
           <picture>
             <img
-              src={profile}
+              src={friendInfo.whoSendFriendRequestProfile_picture || profile}
               alt={profile}
               className="h-full w-full object-cover"
             />
           </picture>
         </div>
         <div>
-          <h3 className="font-poppins text-[24px] font-semibold text-black">
-            Swathi{" "}
+          <h3 className="font-poppins text-[24px] font-semibold capitalize text-black">
+            {friendInfo.whoSendFriendRequestName || "MERN 2307"}
           </h3>
           <p className="font-poppins text-sm font-normal text-black opacity-75">
             Online
@@ -105,9 +131,14 @@ const ChatRight = () => {
             )}
           </button>
           <button className="text-gray-500 hover:text-gray-700">
-            <FaCameraRetro className="text-xl" />
+            <span>
+              <FaCameraRetro className="text-xl" />
+            </span>
           </button>
-          <button className="rounded-full bg-purple-500 p-2 text-white">
+          <button
+            className="rounded-full bg-purple-500 p-2 text-white"
+            onClick={handlemessageSEnt}
+          >
             <IoPaperPlane />
           </button>
         </div>

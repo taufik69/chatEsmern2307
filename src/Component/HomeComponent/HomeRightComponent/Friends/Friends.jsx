@@ -12,8 +12,11 @@ import {
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import moment from "moment";
+import { useSelector, useDispatch } from "react-redux";
+import { freindsAction } from "../../../../Redux/Features/FriendSlice";
 const Friends = ({ isChat = false }) => {
   const db = getDatabase();
+  const dispatch = useDispatch();
   const auth = getAuth();
   const [FriendList, setFriendList] = useState([]);
 
@@ -39,6 +42,11 @@ const Friends = ({ isChat = false }) => {
       const removeFriends = ref(db, "Friends/" + item.friendKey);
       remove(removeFriends);
     });
+  };
+
+  // handleFriends funcition implement
+  const handleFriends = (item = {}) => {
+    dispatch(freindsAction(item));
   };
 
   return (
@@ -68,7 +76,10 @@ const Friends = ({ isChat = false }) => {
 
           <div className="h-[88%] w-full overflow-y-scroll rounded-2xl px-3 scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-sky-400">
             {FriendList?.map((user, index) => (
-              <div className="mt-5 flex items-center gap-x-3">
+              <div
+                className="mt-5 flex items-center gap-x-3"
+                onClick={() => handleFriends(user)}
+              >
                 <div className="h-[80px] w-[80px] rounded-full shadow-2xl">
                   <picture>
                     <img
