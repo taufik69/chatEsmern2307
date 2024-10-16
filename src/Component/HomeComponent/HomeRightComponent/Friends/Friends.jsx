@@ -46,7 +46,25 @@ const Friends = ({ isChat = false }) => {
 
   // handleFriends funcition implement
   const handleFriends = (item = {}) => {
-    dispatch(freindsAction(item));
+    if (auth.currentUser.uid == item.whoRecivedFriendRequestUid) {
+      dispatch(
+        freindsAction({
+          id: item.whoSendFriendRequestUid,
+          name: item.whoSendFriendRequestName,
+          email: item.whoSendFriendRequestEmail,
+          profile_picture: item.whoRecivedFriendRequestUserPhotoUrl,
+        }),
+      );
+    } else {
+      dispatch(
+        freindsAction({
+          id: item.whoRecivedFriendRequestUid,
+          name: item.whoRecivedFriendRequestUserName,
+          email: item.whoRecivedFriendRequestUserEmail,
+          profile_picture: item.whoRecivedFriendRequestUserPhotoUrl,
+        }),
+      );
+    }
   };
 
   return (

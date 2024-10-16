@@ -5,12 +5,42 @@ import { FaCameraRetro, FaSmile } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
 import { set, getDatabase, push, ref } from "firebase/database";
+import { getAuth } from "firebase/auth";
+import {
+  getStorage,
+  ref as uploadref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 import moment from "moment/moment";
-import { retry } from "@reduxjs/toolkit/query";
+import Modal from "react-modal";
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    width: "60%",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+  },
+};
 const ChatRight = () => {
   const db = getDatabase();
+  const auth = getAuth();
   const [showEmoji, setShowEmoji] = useState(false);
   const [message, setmessage] = useState("");
+  const [progress, setprogress] = useState(null);
+  const [image, setimage] = useState("");
+  const [modalIsOpen, setIsOpen] = useState(false);
+
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  function closeModal() {
+    setIsOpen(false);
+  }
   // handleEmoji function implement
   const handleEmoji = () => {
     setShowEmoji(!showEmoji);
@@ -33,9 +63,19 @@ const ChatRight = () => {
 
   const handlemessageSEnt = () => {
     if (friendInfo) {
+      console.log(friendInfo);
+
       set(push(ref(db, "singleMsg/")), {
-        ...friendInfo,
+        whoSendMsgUid: auth.currentUser.uid,
+        whoSendMsgName: auth.currentUser.displayName,
+        whoSendMsgEmail: auth.currentUser.email,
+        whoSendMsgProfilePicture: auth.currentUser.photoURL,
+        whoRecivedMsgUid: friendInfo?.id,
+        whoRecivedMsgName: friendInfo?.name,
+        whoRecivedMsgEmail: friendInfo?.email,
+        whoRecivedProfilePicture: friendInfo?.profile_picture,
         msg: message,
+        image: image ? image : null,
         createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
       })
         .then(() => {
@@ -50,13 +90,40 @@ const ChatRight = () => {
     }
   };
 
+  // handleImagePicker funtion implement
+  const handleImagePicker = (event) => {
+    const storage = getStorage();
+    const storageRef = uploadref(
+      storage,
+      "images/" + event.target.files[0]?.name,
+    );
+    const uploadTask = uploadBytesResumable(storageRef, event.target.files[0]);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setprogress(progress);
+      },
+      (error) => {
+        console.error("error from image upload: ", error);
+      },
+      () => {
+        closeModal();
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setimage(downloadURL);
+        });
+      },
+    );
+  };
+
   return (
-    <>
+    <div>
       <div className="flex items-center gap-x-5 border-b-2 border-b-gray-200 p-6">
         <div className="h-[75px] w-[75px] rounded-full shadow-gray-100">
           <picture>
             <img
-              src={friendInfo.whoSendFriendRequestProfile_picture || profile}
+              src={friendInfo.profile_picture || profile}
               alt={profile}
               className="h-full w-full object-cover"
             />
@@ -64,7 +131,7 @@ const ChatRight = () => {
         </div>
         <div>
           <h3 className="font-poppins text-[24px] font-semibold capitalize text-black">
-            {friendInfo.whoSendFriendRequestName || "MERN 2307"}
+            {friendInfo.name || "MERN 2307"}
           </h3>
           <p className="font-poppins text-sm font-normal text-black opacity-75">
             Online
@@ -130,7 +197,10 @@ const ChatRight = () => {
               </span>
             )}
           </button>
-          <button className="text-gray-500 hover:text-gray-700">
+          <button
+            className="text-gray-500 hover:text-gray-700"
+            onClick={openModal}
+          >
             <span>
               <FaCameraRetro className="text-xl" />
             </span>
@@ -143,7 +213,79 @@ const ChatRight = () => {
           </button>
         </div>
       </div>
-    </>
+
+      {/* modal body */}
+      <div>
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          style={customStyles}
+          contentLabel="Example Modal"
+        >
+          <button
+            onClick={closeModal}
+            className="mb-10 h-10 w-10 rounded-full bg-red-800 text-white"
+          >
+            X
+          </button>
+
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="flex w-full items-center justify-center">
+              <label
+                htmlFor="dropzone-file"
+                className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+              >
+                <div className="flex flex-col items-center justify-center pb-6 pt-5">
+                  <svg
+                    className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 16"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                    />
+                  </svg>
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+                  </p>
+                </div>
+                <input
+                  id="dropzone-file"
+                  type="file"
+                  className="hidden"
+                  onChange={handleImagePicker}
+                />
+              </label>
+            </div>
+            {progress >= 1 ? (
+              <div class="w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  class="my-5 w-full rounded-lg bg-blue-600 py-3 text-center text-xs font-bold leading-none text-white"
+                  style={{ width: `${Math.ceil(progress)}%` }}
+                >
+                  {Math.ceil(progress)}%
+                </div>
+              </div>
+            ) : (
+              <button className="my-5 w-full rounded-lg bg-blue-600 py-3 font-bold text-white hover:bg-blue-500">
+                Send
+              </button>
+            )}
+          </form>
+        </Modal>
+      </div>
+      {/* modal body */}
+    </div>
   );
 };
 
