@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import profile from "../../assets/home/Homeright/purr.gif";
 import { IoPaperPlane } from "react-icons/io5";
 import { FaCameraRetro, FaSmile } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
-import { set, getDatabase, push, ref } from "firebase/database";
+import { set, getDatabase, push, ref, onValue } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import {
   getStorage,
@@ -12,6 +12,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+
 import moment from "moment/moment";
 import Modal from "react-modal";
 const customStyles = {
@@ -33,6 +34,7 @@ const ChatRight = () => {
   const [progress, setprogress] = useState(null);
   const [image, setimage] = useState("");
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [singlemsg, setsinglemsg] = useState([]);
 
   function openModal() {
     setIsOpen(true);
@@ -63,8 +65,6 @@ const ChatRight = () => {
 
   const handlemessageSEnt = () => {
     if (friendInfo) {
-      console.log(friendInfo);
-
       set(push(ref(db, "singleMsg/")), {
         whoSendMsgUid: auth.currentUser.uid,
         whoSendMsgName: auth.currentUser.displayName,
@@ -117,6 +117,28 @@ const ChatRight = () => {
     );
   };
 
+  // fetch data from singlemsg
+  useEffect(() => {
+    const fetchdata = () => {
+      const starCountRef = ref(db, "singleMsg/");
+      let singleMsg = [];
+      onValue(starCountRef, (snapshot) => {
+        snapshot.forEach((item) => {
+          if (
+            auth.currentUser.uid === item.val().whoRecivedMsgUid ||
+            auth.currentUser.uid === item.val().whoSendMsgUid
+          ) {
+            singleMsg.push({ ...item.val(), singlemsgKey: item.key });
+          }
+        });
+      });
+      setsinglemsg(singleMsg);
+    };
+    fetchdata();
+  }, []);
+
+  console.log(singlemsg);
+
   return (
     <div>
       <div className="flex items-center gap-x-5 border-b-2 border-b-gray-200 p-6">
@@ -139,41 +161,26 @@ const ChatRight = () => {
         </div>
       </div>
       {/* chat  body */}
-      <div className="h-[70vh] bg-blue-200 p-6">
+      <div className="h-[70vh] overflow-y-scroll bg-blue-200 p-6">
         <div className="flex flex-col justify-between gap-y-5">
-          <div className="w-[30%] self-start">
-            <div className="box w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-              <span>Hey There !</span>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-end">
-            <div className="box--right w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-              <span>Hey There !</span>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-start">
-            <div className="box w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-              <span>Hey There !</span>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-start">
-            <div className="box w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-              <span>Hey There !</span>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-          <div className="w-[30%] self-end">
-            <div className="box--right w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-              <span>Hey There !</span>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
+          {singlemsg?.map((msg) =>
+            auth.currentUser.uid == msg.whoSendMsgUid &&
+            msg.whoRecivedMsgUid == friendInfo.id ? (
+              <div className="w-[30%] self-end">
+                <div className="box--right w-full text-wrap bg-[#F1F1F1] py-5 text-center">
+                  <span>{msg.msg}</span>
+                </div>
+                <p>Today, 2:01pm</p>
+              </div>
+            ) : (
+              <div className="w-[30%] self-start">
+                <div className="box w-full text-wrap bg-[#F1F1F1] py-5 text-center">
+                  <span>{msg.msg}</span>
+                </div>
+                <p>Today, 2:01pm</p>
+              </div>
+            ),
+          )}
         </div>
       </div>
 

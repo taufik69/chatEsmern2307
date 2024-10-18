@@ -25,7 +25,10 @@ const Friends = ({ isChat = false }) => {
     onValue(starCountRef, (snapshot) => {
       let frdarr = [];
       snapshot.forEach((item) => {
-        if (auth.currentUser.uid === item.val().whoRecivedFriendRequestUid)
+        if (
+          auth.currentUser.uid === item.val().whoRecivedFriendRequestUid ||
+          auth.currentUser.uid == item.val().whoSendFriendRequestUid
+        )
           frdarr.push({ ...item.val(), friendKey: item.key });
       });
       setFriendList(frdarr);
@@ -113,7 +116,9 @@ const Friends = ({ isChat = false }) => {
                 </div>
                 <div className="ml-2 flex basis-[65%] flex-col items-start justify-center">
                   <h1 className="heading capitalize">
-                    {user.whoSendFriendRequestName}
+                    {auth.currentUser.uid === user.whoRecivedFriendRequestUid
+                      ? user.whoSendFriendRequestName
+                      : user.whoRecivedFriendRequestUserName}
                   </h1>
                   <p className="subHeading">{moment(user.createdAt).toNow()}</p>
                 </div>
