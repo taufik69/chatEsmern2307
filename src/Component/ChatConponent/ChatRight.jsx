@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import profile from "../../assets/home/Homeright/purr.gif";
 import { IoPaperPlane } from "react-icons/io5";
 import { FaCameraRetro, FaSmile } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
 import { set, getDatabase, push, ref, onValue } from "firebase/database";
+
 import { getAuth } from "firebase/auth";
 import {
   getStorage,
@@ -29,6 +30,7 @@ const customStyles = {
 const ChatRight = () => {
   const db = getDatabase();
   const auth = getAuth();
+  const emojiRef = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [message, setmessage] = useState("");
   const [progress, setprogress] = useState(null);
@@ -65,28 +67,56 @@ const ChatRight = () => {
 
   const handlemessageSEnt = () => {
     if (friendInfo) {
-      set(push(ref(db, "singleMsg/")), {
-        whoSendMsgUid: auth.currentUser.uid,
-        whoSendMsgName: auth.currentUser.displayName,
-        whoSendMsgEmail: auth.currentUser.email,
-        whoSendMsgProfilePicture: auth.currentUser.photoURL,
-        whoRecivedMsgUid: friendInfo?.id,
-        whoRecivedMsgName: friendInfo?.name,
-        whoRecivedMsgEmail: friendInfo?.email,
-        whoRecivedProfilePicture: friendInfo?.profile_picture,
-        msg: message,
-        image: image ? image : null,
-        createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
-      })
-        .then(() => {
-          console.log("done");
+      if (message) {
+        set(push(ref(db, "singleMsg/")), {
+          whoSendMsgUid: auth.currentUser.uid,
+          whoSendMsgName: auth.currentUser.displayName,
+          whoSendMsgEmail: auth.currentUser.email,
+          whoSendMsgProfilePicture: auth.currentUser.photoURL,
+          whoRecivedMsgUid: friendInfo?.id || " ",
+          whoRecivedMsgName: friendInfo?.name || "",
+          whoRecivedMsgEmail: friendInfo?.email || "",
+          whoRecivedProfilePicture: friendInfo?.profile_picture || "",
+          msg: message || "",
+          image: image ? image : null,
+          createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
         })
-        .catch((err) => {
-          console.error("message", err);
+          .then(() => {
+            console.log("done");
+          })
+          .catch((err) => {
+            console.error("message", err);
+          })
+          .finally(() => {
+            setmessage("");
+            setShowEmoji(false);
+          });
+      } else {
+        set(push(ref(db, "singleMsg/")), {
+          whoSendMsgUid: auth.currentUser.uid,
+          whoSendMsgName: auth.currentUser.displayName,
+          whoSendMsgEmail: auth.currentUser.email,
+          whoSendMsgProfilePicture: auth.currentUser.photoURL,
+          whoRecivedMsgUid: friendInfo?.id || " ",
+          whoRecivedMsgName: friendInfo?.name || "",
+          whoRecivedMsgEmail: friendInfo?.email || "",
+          whoRecivedProfilePicture: friendInfo?.profile_picture || "",
+          msg: message || "",
+          image: image ? image : null,
+          createdAt: moment().format(" MM DD YYYY, h:mm:ss a"),
         })
-        .finally(() => {
-          setmessage("");
-        });
+          .then(() => {
+            console.log("Image send  done");
+          })
+          .catch((err) => {
+            console.error("message", err);
+          })
+          .finally(() => {
+            setmessage("");
+            setShowEmoji(false);
+            setimage("");
+          });
+      }
     }
   };
 
@@ -121,8 +151,8 @@ const ChatRight = () => {
   useEffect(() => {
     const fetchdata = () => {
       const starCountRef = ref(db, "singleMsg/");
-      let singleMsg = [];
       onValue(starCountRef, (snapshot) => {
+        let singleMsg = [];
         snapshot.forEach((item) => {
           if (
             auth.currentUser.uid === item.val().whoRecivedMsgUid ||
@@ -131,13 +161,13 @@ const ChatRight = () => {
             singleMsg.push({ ...item.val(), singlemsgKey: item.key });
           }
         });
+        setsinglemsg(singleMsg);
       });
-      setsinglemsg(singleMsg);
     };
     fetchdata();
   }, []);
 
-  console.log(singlemsg);
+  // now take a span ref
 
   return (
     <div>
@@ -161,14 +191,30 @@ const ChatRight = () => {
         </div>
       </div>
       {/* chat  body */}
-      <div className="h-[70vh] overflow-y-scroll bg-blue-200 p-6">
+      <div className="backgroundimage h-[70vh] overflow-y-scroll bg-blue-200 p-6">
         <div className="flex flex-col justify-between gap-y-5">
           {singlemsg?.map((msg) =>
             auth.currentUser.uid == msg.whoSendMsgUid &&
             msg.whoRecivedMsgUid == friendInfo.id ? (
-              <div className="w-[30%] self-end">
-                <div className="box--right w-full text-wrap bg-[#F1F1F1] py-5 text-center">
-                  <span>{msg.msg}</span>
+              msg.image ? (
+                <div className="w-[30%] self-end">
+                  <div className="w-full text-wrap bg-[#F1F1F1] text-center">
+                    <img src={msg.image} alt="" />
+                  </div>
+                  <p>Today, 2:01pm</p>
+                </div>
+              ) : (
+                <div className="w-[30%] self-end">
+                  <div className="box--right w-full text-wrap bg-[#F1F1F1] py-5 text-center">
+                    <span>{msg.msg}</span>
+                  </div>
+                  <p>Today, 2:01pm</p>
+                </div>
+              )
+            ) : msg.image ? (
+              <div className="w-[30%] self-start">
+                <div className="w-full text-wrap bg-[#F1F1F1] text-center">
+                  <img src={msg.image} alt="" />
                 </div>
                 <p>Today, 2:01pm</p>
               </div>
@@ -212,12 +258,18 @@ const ChatRight = () => {
               <FaCameraRetro className="text-xl" />
             </span>
           </button>
-          <button
-            className="rounded-full bg-purple-500 p-2 text-white"
-            onClick={handlemessageSEnt}
-          >
-            <IoPaperPlane />
-          </button>
+          {friendInfo.id ? (
+            <button
+              className="rounded-full bg-purple-500 p-2 text-white"
+              onClick={handlemessageSEnt}
+            >
+              <IoPaperPlane />
+            </button>
+          ) : (
+            <button className="rounded-full bg-purple-500 p-2 text-white">
+              <IoPaperPlane />
+            </button>
+          )}
         </div>
       </div>
 

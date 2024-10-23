@@ -44,6 +44,13 @@
 }
 
 @layer components {
+  .backgroundimage {
+    background-image: url("../src/assets/Resgistraion/registation.gif");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
   .heading {
     @apply text-wrap break-words font-poppins text-[18px] font-semibold text-black;
   }
